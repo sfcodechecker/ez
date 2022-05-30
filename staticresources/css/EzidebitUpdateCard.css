@@ -1,0 +1,66 @@
+ .slds-scope .slds-text-heading_small, .slds-scope .slds-text-heading--small {
+        font-size: 23.5px;
+        line-height: 35.25;
+    }
+    .slds-scope .slds-spinner_large, .slds-scope .slds-spinner--large {
+        width: 3.75rem;
+    }
+
+    .col-md-6 {
+        width: 100% !important;
+    }
+
+    body label, .slds-vf-scope label {
+    	font-family: system-ui !important;
+        display: inline-block;
+        font-size: 1em !important;
+        line-height: 1.2;
+	font-weight: 600 !important;
+	color : rgb(68, 68, 68) !important;
+    }
+    .payment-form.dark{
+        background-color: #f6f6f6;
+    }
+    
+    
+    .payment-form form{
+        border-top: 2px solid #5ea4f3;
+        box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.075);
+        background-color: #ffffff;
+        padding: 0;
+        max-width: 780px;
+        margin: auto;
+    }
+    .payment-form .title {
+        font-size: 1.2em;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        margin-bottom: 1.8em;
+        margin-top: 15px;
+        font-weight: 600 !important;
+        padding-bottom: 8px;
+    }
+    
+    .payment-form .products{
+        background-color: #f7fbff;
+        padding: 25px;
+    }
+    
+    
+    
+    @media (min-width: 576px) {
+        .payment-form .title {
+            font-size: 1.2em; 
+        }
+        
+        .payment-form .products {
+            padding: 10px; 
+        }
+        
+        .payment-form .products .label {
+            font-size: 1em; 
+        }
+        
+        .paymentmethod{
+            width: 95%;
+        }
+    }
