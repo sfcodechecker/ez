@@ -1,0 +1,8 @@
+.THIS .NotConnected {
+    border-style: solid;
+    border-color: coral;
+}
+.THIS .Connected {
+    border-style: solid;
+    border-color: green;
+}

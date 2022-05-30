@@ -1,0 +1,112 @@
+<apex:page controller="GatewayReceiptPageController" title="EzyCharge Receipt | EzyCharge" sidebar="false" showHeader="false"> 
+<apex:form >
+    <head>
+        <style>
+            .slds-scope .slds-text-heading_small, .slds-scope .slds-text-heading--small {
+            font-size: 23.5px;
+            line-height: 35.25;
+            }
+            .slds-scope .slds-spinner_large, .slds-scope .slds-spinner--large {
+                width: 3.75rem;
+                }
+        </style>
+    </head>
+    <div style = "display:Block" id="spinner" class="slds-spinner_container">
+        <div class="slds-spinner--brand slds-spinner slds-spinner--large" aria-hidden="false" role="status">
+            <span class="slds-assistive-text">Please wait do not close.</span>
+            <div class="slds-spinner__dot-a"></div>
+            <div class="slds-spinner__dot-b"></div>
+        </div>
+        <div id="onloaderror" class="slds-grid slds-grid--align-center slds-text-heading--small">
+            Please wait do not close...
+        </div>
+    </div>
+    <div>
+        <br/><br/>
+        <center>
+            <article class="slds-card" style="width:50%;" >
+                <apex:outputPanel id="ReceiptPanel">
+                    <apex:includeLightning />
+                    <apex:Slds />
+                    <br/>
+                    <script>
+                   function refreshDetailPage(){
+                           window.close();
+                        }
+                        window.addEventListener('load', function () {
+                            document.getElementById('spinner').style.display = 'none';
+                            loadData();
+                        }, false);
+                    
+                        function hideSpinner(){
+                            document.getElementById('spinner').style.display = 'none';
+                        }
+                        function redirectToURL(returnUrl) {
+                                document.getElementById('spinner').style.display = 'block';
+                                window.location.href = returnUrl;
+                            }
+                    </script>
+                    
+                    <div class="slds-card__header slds-grid">
+                        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                        </header>
+                    </div>
+                    
+                    <div class="slds-card__body slds-card__body_inner">
+                        <!-- Transaction Detail -->            
+                        <div id="logotodisplay" /> 
+                         <br /><br />                               
+                        <br/><br/>
+                        <apex:outputPanel rendered="{!chargeType == 'OneTime'}">
+                            <div>
+                                <apex:outputText value="Payment Amount: <b>${!HTMLENCODE(amount)} (AUD)</b>" escape="false"/>  
+                                <apex:outputText value="<br/>Payment Id: <b>{!HTMLENCODE(paymentId)}</b>" escape="false" rendered="{!paymentId != null}"/>  <br/> 
+                                <apex:outputText value="Payment Status: " escape="false" rendered="{!paymentStatus != null}"/>
+                                <apex:outputText value="{!HTMLENCODE(paymentStatus)}" style="color:{!IF(paymentStatus == 'Transaction Approved','green',If(paymentStatus != 'Transaction Approved','red','black'))};" escape="false" rendered="{!paymentStatus != null}"/>
+                            </div>
+                        </apex:outputPanel>
+
+                        <apex:outputPanel rendered="{!chargeType == 'Recurring'}">
+
+                            <apex:outputPanel rendered="{!paymentStatus == 'Payment Approved'}">
+                                <div>
+                                    <apex:outputText value="Recurring Payment Amount: <b>${!HTMLENCODE(amount)} (AUD)</b>" escape="false"/>  <br/> 
+                                    <apex:outputText value="Recurring Payment Status: " escape="false"/>
+                                    <apex:outputText value="{!HTMLENCODE(paymentStatus)}" style="color:green;" escape="false"/> <br/>
+                                    <apex:outputText value="Installment Period: <b>{!HTMLENCODE(installPeriod)}</b>" escape="false"/>  <br/> 
+                                    <apex:outputText value="Date Established: <b>{!HTMLENCODE(establishmentDate)}</b>" escape="false"/>  <br/> 
+                                    <apex:outputText value="Next Installment Date: <b>{!HTMLENCODE(nextInstallmentDate)}</b>" escape="false"/>
+                                </div>
+                            </apex:outputPanel>
+
+                            <apex:outputPanel rendered="{!paymentStatus == 'Payment Rejected'}">
+                                <div>
+                                    <apex:outputText value="Recurring Payment Amount: <b>${!HTMLENCODE(amount)} (AUD)</b>" escape="false"/>  <br/> 
+                                    <apex:outputText value="Recurring Payment Status: " escape="false"/>
+                                    <apex:outputText value="{!HTMLENCODE(paymentStatus)}" style="color:red;" escape="false"/> <br/>
+                                    <apex:outputText value="Installment Period: <b>{!HTMLENCODE(installPeriod)}</b>" escape="false"/>  <br/> 
+                                    <apex:outputText value="Installment Date: <b>{!HTMLENCODE(establishmentDate)}</b>" escape="false"/>
+                                </div>
+                            </apex:outputPanel>
+                        </apex:outputPanel>
+                        <br/><br/>
+                    </div>        
+                    <hr/>
+                    <apex:outputText value="<b> {!HTMLENCODE(paymentResponse)} </b>" escape="false"  rendered="{!paymentResponse != null}"/> 
+                    <br/><br/><br/>
+                </apex:outputPanel>
+            </article>
+            <br/>
+            <div>
+               <button type="button" class="slds-button slds-button_neutral" onclick="javascript:refreshDetailPage();">Close</button> &nbsp;&nbsp;&nbsp;&nbsp;
+               <apex:outputPanel id="PaymentRejectedpanel" rendered="{!paymentStatus == 'Payment Rejected' && status == 'accept'}">
+                    <apex:commandButton action="{!retryTransaction}" oncomplete="redirectToURL('{!returnUrl}');" value="Retry" styleClass="slds-button slds-button_brand" />
+               </apex:outputPanel>
+               <apex:outputPanel id="TransactionRejectedpanel" rendered="{!paymentStatus == 'Transaction Rejected' && status == 'accept'}">
+                    <apex:commandButton action="{!retryTransaction}" oncomplete="redirectToURL('{!returnUrl}');" value="Retry" styleClass="slds-button slds-button_brand" />
+               </apex:outputPanel>
+            </div>
+        </center>
+    </div>
+</apex:form>
+</apex:page>

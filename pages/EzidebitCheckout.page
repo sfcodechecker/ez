@@ -1,0 +1,306 @@
+<apex:page id="pa" controller="EzidebitCheckoutController" title="Ezidebit Payments | EzyCharge" showHeader="false" standardStylesheets="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0" lightningStylesheets="false">
+    
+    <apex:pageMessages ></apex:pageMessages>    
+    <apex:outputPanel id="renderPanel" rendered="{!errorMessage==null || errorMessage==''}">  
+        <apex:form id="paymentForm">
+            
+            
+            <html lang="en">
+                <head>
+                    <title>Ezidebit Payments | EzyCharge</title>
+                    <meta charset="utf-8" />
+                    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/v3.3.1bootstrap.min.css')}"/>
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/EzidebitCheckout.css')}"/>
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/default.css')}"/>
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/page.css')}"/>
+                    <apex:includeScript value="{!URLFOR($Resource.Payments,'/JS/jquery-3.6.0.min.js')}"/>
+                    <apex:includeScript value="{!URLFOR($Resource.Payments,'/JS/jquery.validate.min.js')}"/>
+                    <apex:includeScript value="{!URLFOR($Resource.Payments,'/JS/bootstrap.min.js')}"/>
+                    <apex:includeScript value="{!URLFOR($Resource.Payments,'/JS/ezidebit.js')}"/>
+                    
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/v4.0.0bootstrap.min.css')}"/>
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/font.css')}"/>
+                <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/style.css')}"/>
+                    
+                    <div class="overlay" style="display: block;" id="spinner">
+                        <div class="overlay__wrapper">
+                            <div class="overlay__spinner">
+                            </div>
+                        </div>
+                         <p class="wait" style="Text-align : center; font-size: 22px;font-weight: 600;margin-top: -44%; color: gainsboro;">Please wait do not close.</p>
+                    </div>
+                    <script>
+                    
+                    function handleSpinner(){
+                        document.getElementById('spinner').style.display = 'block';
+                    }
+                    window.addEventListener('load', function () {
+                        document.getElementById('spinner').style.display = 'none';
+                    }, false);
+                    
+                    var ezy$=jQuery.noConflict();
+                    
+                    ezy$(document).ready(function () {
+                        var date = new Date().getFullYear();
+                        var length = date + 10;
+                        for(var i=date;i<length;i++){
+                            ezy$('#paymentMethodCreditCard #expiryYear').append('<option value='+i+'>'+i+'</option');   
+                        }
+                        
+                        var publicKey = ezy$('#sampleAPIModal #publicKey').val();
+                        var endpoint = ezy$('#sampleAPIModal #endPoint').val();
+                        var recordId = ezy$('#paymentReference').val();
+                        var amount = ezy$('#amount').val();
+                        var logId= '{!JSENCODE(logId)}'
+                        
+                        var displaySubmitCallback = function (data) {
+                            document.getElementById('spinner').style.display = 'block';
+                            createLog(JSON.stringify(data));
+                        }
+                        var displaySubmitError = function (data) {
+                            document.getElementById('spinner').style.display = 'none';
+                            ezy$('#submitErrorDialog #customErrorInsert').text(data);
+                            ezy$('#submitErrorDialog').modal();
+                        }
+                        
+                        eziDebit.init(publicKey, {
+                            submitAction: "ChargeCard",
+                            submitButton: "payNowButton",
+                            submitCallback: displaySubmitCallback,
+                            submitError: displaySubmitError,
+                            nameOnCard: "nameOnCard",
+                            cardNumber: "cardNumber",
+                            cardExpiryMonth: "expiryMonth",
+                            cardExpiryYear: "expiryYear",
+                            cardCCV: "ccv",
+                            paymentAmount: "amount",
+                            paymentReference: "paymentReference"
+                        }, endpoint);
+                    });
+                    function redirectToPost(){
+                        var returnUrl='{!JSENCODE(callbackUrl)}';
+                        window.location.href=returnUrl;
+                    } 
+                    
+                    </script>
+                </head>
+                <body style="font-family: 'Montserrat', sans-serif !important;">
+                    <main class="page payment-page" id="mainform">
+                        <section class="payment-form dark">
+                            <div class="container">
+                                <form id="payform" >
+                                    <div class="products">
+                                        <div class="container text-center">
+                                            <apex:image alt="Ezidebit Pty Ltd" url="{!URLFOR($Resource.Payments,'logos/powered-by-smaller.png')}" width="25%" height="25%"/>
+                                        </div>
+                                        <h3 class="title">Checkout Details</h3>
+                                        <div class="item">
+                                            <div style="{!IF(Name != null, 'display:block', 'display:none')}">
+                                                <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(Name)}</span>
+                                                <p class="item-name">Name</p>
+                                            </div>
+                                            <div style="{!IF(email != null, 'display:block', 'display:none')}">
+                                                <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(email)}</span>
+                                                <p class="item-name">Email</p>
+                                            </div>
+                                            <div style="{!IF(showAmount != null, 'display:block', 'display:none')}">
+                                                <span class="price"> :&nbsp;&nbsp;&nbsp;${!HTMLENCODE(showAmount)} (AUD)</span>
+                                                <p class="item-name">Amount</p>
+                                            </div> 
+                                        </div>
+                                    </div>
+                                    <div class="products">
+                                        <h3 class="title">Credit Card Details</h3>
+                                        
+                                        <!-- Iframe section start -->
+                                        <centre>
+                                            <div class="modal fade" id="sampleAPIModal">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h4 class="modal-title">Setup Sample Page</h4>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <ul class="inputs">
+                                                                <li>
+                                                                    <label for="publicKey" style="width: 35%">Public Key: </label>
+                                                                    <input type="hidden" id="publicKey" value="{!HTMLENCODE(publicKey)}" />
+                                                                </li>
+                                                                <li>
+                                                                    <label for="endpoint" style="width: 35%">Endpoint: </label>
+                                                                    <input type="hidden" id="endPoint" value="{!HTMLENCODE(endPoint)}" />
+                                                                </li>
+                                                                <li>
+                                                                    <label for="jsonData" style="width: 35%">JSONDATA: </label>
+                                                                    <!--<input type="hidden" id="jsonData" value="{!jsonData}" />-->
+                                                                    
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button id="setDetailsButton" type="button" class="btn btn-primary">Apply</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Server error slide down HTML code -->
+                                            <div id="serverError" style="display: none;">
+                                                <button type="button" class="close close-error" data-dismiss="modal">&times;</button>
+                                                <p>
+                                                    <span class="glyphicon glyphicon-info-sign"></span>
+                                                    <strong id="serverError-errorDescription"></strong>
+                                                    <span id="serverError-errorMessage"></span>
+                                                </p>
+                                            </div>
+                                            
+                                            <!--Page Header-->
+                                            <div class="container">
+                                                <!--Error Modal Dialog-->
+                                                <div id="submitErrorDialog" class="modal fade">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header" style="padding-right : 90%">
+                                                                <h4 class="modal-title">Error</h4>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p id="customErrorInsert"></p>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!--Payment Form
+<form id="paymentForm" method="POST" action="/payment">-->
+                                                <fieldset>
+                                                    <div class="row main">
+                                                        <div class="form-group col-md-6">
+                                                            
+                                                            <input type="hidden" id="paymentReference" class="form-control" value="{!HTMLENCODE(recordId)}" />
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="row main">
+                                                        <div class="form-group col-md-6">
+                                                            <input type="hidden" id="amount" class="form-control" value="{!HTMLENCODE(amount)}" disabled="true" />
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                                <fieldset>
+                                                    <div id="paymentMethodCreditCard">
+                                                        <div class="form-group col-md-6">
+                                                            <label for="cardNumber" class="control-label" style="font-weight: 600;">Card Number
+                                                                <em>*</em>
+                                                            </label>
+                                                            
+                                                            <div class="controls">
+                                                                <input type="text" id="cardNumber" name="cardNumber" class="form-control" maxlength="19" style="background: url() right center no-repeat;"
+                                                                       />
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="form-group col-md-6 extra-space">
+                                                            <label for="expiryMonth" class="control-label" style="font-weight: 600;">Expiry Date
+                                                                <em>*</em>
+                                                            </label>
+                                                            
+                                                            <div class="row">
+                                                                <div class="col-xs-6">
+                                                                    <select id="expiryMonth" name="expiryMonth" class="form-control">
+                                                                        <option disabled="true" selected="true">MM</option>
+                                                                        <option value="01">01</option>
+                                                                        <option value="02">02</option>
+                                                                        <option value="03">03</option>
+                                                                        <option value="04">04</option>
+                                                                        <option value="05">05</option>
+                                                                        <option value="06">06</option>
+                                                                        <option value="07">07</option>
+                                                                        <option value="08">08</option>
+                                                                        <option value="09">09</option>
+                                                                        <option value="10">10</option>
+                                                                        <option value="11">11</option>
+                                                                        <option value="12">12</option>
+                                                                    </select>
+                                                                </div>
+                                                                
+                                                                <div class="col-xs-6">
+                                                                    <select id="expiryYear" name="expiryYear" class="form-control">
+                                                                        <option disabled="true" selected="true">YYYY</option>
+                                                                        <!--<option value="2021">2021</option>
+<option value="2022">2022</option>
+<option value="2023">2023</option>
+<option value="2024">2024</option>
+<option value="2025">2025</option>
+<option value="2026">2026</option>
+<option value="2027">2027</option>
+<option value="2028">2028</option>
+<option value="2029">2029</option>
+<option value="2030">2030</option>
+<option value="2031">2031</option>-->
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="form-group col-md-6">
+                                                            <label for="nameOnCard" class="control-label" style="font-weight: 600;">Name on Card
+                                                                <em>*</em>
+                                                            </label>
+                                                            
+                                                            <div class="controls">
+                                                                <input type="text" id="nameOnCard" name="nameOnCard" class="form-control" maxlength="50" />
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="form-group col-md-6 extra-space">
+                                                            <label for="ccv" class="control-label labelStyle" style="font-weight: 600;">CCV
+                                                                <em>*</em>
+                                                            </label>
+                                                            <div class="controls">
+                                                                <div class="row">
+                                                                    <div class="col-xs-6">
+                                                                        <input id="ccv" name="ccv" class="form-control inputTextStyle" placeholder="Enter CCV" type="password" value="" />
+                                                                    </div>
+                                                                    <div class="col-xs-6">
+                                                                        <span id="whatisthis">What is this?
+                                                                            <span style="top:-257%">
+                                                                                <apex:image alt="Image showing CCV is located next to the signature panel" url="{!URLFOR($Resource.Payments,
+                                                                                                                                                                'logos/Credit_card_cvv.jpeg')}" width="90%" height="90%"/> 
+                                                                            </span>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden" value="{!ref_log.Serialized_Record__c}" id="logDetails"/>
+                                                    </div>
+                                                    
+                                                    <div class="col-md-12" id="payButtonId" onClick= "handleSpinner();" >
+                                                        <button id="payNowButton" type="submit" class="btn-pay-now pull-left" style="width:100%;height:34px"> Charge </button>
+                                                    </div>
+                                                </fieldset>
+                                                <input type="hidden" name="errorMessage" id="errorMessage" value="{!errorMessage}"/>
+                                            </div>
+                                            
+                                        </centre>
+                                    </div>
+                                </form>
+                            </div>
+                        </section>
+                    </main>    
+                </body>
+                <apex:includeScript value="{!URLFOR($Resource.Payments,'/JS/creditcard.js')}"></apex:includeScript>
+                <apex:includeScript value="{!URLFOR($Resource.Payments,'/JS/utils.js')}"></apex:includeScript>
+                <apex:includeScript value="{!URLFOR($Resource.Payments,'/JS/page.js')}"></apex:includeScript>
+            </html>
+            <apex:actionFunction action="{!createPaymentLog}" name="createLog" oncomplete="redirectToPost();" reRender="renderPanel">
+                <apex:param value="{!jsonData}" name="jsonData" assignTo="{!jsonData}"/>
+            </apex:actionFunction> 
+        </apex:form>
+    </apex:outputPanel> 
+</apex:page>

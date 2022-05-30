@@ -1,0 +1,238 @@
+<apex:page controller="UpdateCreditCardController" lightningStylesheets="true" sidebar="false" showHeader="false" title="NABTransact Payment | EzyCharge">
+    <apex:pageMessages ></apex:pageMessages>
+    <html lang="en">
+        <head>
+            <title>NAB Transact Payments | EzyCharge</title>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+            
+            <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/NABTransactCheckout.css')}"/>
+            <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/v4.0.0bootstrap.min.css')}"/>
+            <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/font.css')}"/>
+                <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/style.css')}"/>
+            
+            <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/getpaymentsbootstrap.min.css')}"/>
+            <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/getpaymentsdefault.css')}"/>
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/getpaymentspage.css')}"/>
+            
+            <div class="overlay" style="display: block;" id="spinner">
+                <div class="overlay__wrapper">
+                    <div class="overlay__spinner"></div>
+                </div>
+                <p class="wait" style="Text-align : center; font-size: 22px;font-weight: 600;margin-top: -44%; color: gainsboro;">Please wait do not close.</p>
+            </div>
+        </head>
+        <body>
+            <main class="page payment-page" id="mainform">
+                <section class="payment-form dark">
+                    <div class="container">
+                        <form id="paymentForm" method="POST" action="{!endPoint}" >
+                            <div class="products">
+                                <div class="text-center">
+                                    <apex:image alt="NAB Transact logo" url="{!URLFOR($Resource.Payments,'logos/nab_logo.gif')}" width="20%" height="20%"/>
+                                </div>
+                                <h3 class="title">Recurring Payment Details</h3>
+                                <div style="{!IF(rpName != null, 'display:block', 'display:none')}">
+                                    <div class="item">
+                                        <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(rpName)}</span>
+                                        <p class="item-name">Recurring Payment</p>
+                                    </div>
+                                </div>
+                                <div style="{!IF(showAmount != null, 'display:block', 'display:none')}">
+                                    <div class="item">
+                                        <span class="price"> :&nbsp;&nbsp;&nbsp;${!HTMLENCODE(showAmount)} (AUD)</span>
+                                        <p class="item-name">Regular Amount</p>
+                                    </div>
+                                </div>
+                                <div style="{!IF(nextPayDate != null, 'display:block', 'display:none')}">
+                                    <div class="item">
+                                        <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(nextPayDate)}</span>
+                                        <p class="item-name">Next Installment Date</p>
+                                    </div>
+                                </div>
+                                <div style="{!IF(installperiod != null, 'display:block', 'display:none')}">
+                                    <div class="item">
+                                        <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(installperiod)}</span>
+                                        <p class="item-name">Installment Period</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="products">
+                                <h3 class="head">Credit Card Details </h3>
+                                <!-- Iframe section start -->
+                                <div class="iframe">
+                                    <div class="container">
+                                        <!--Payment Form-->
+                                        <form id="paymentForm" method="POST" action="{!endPoint}">
+                                            
+                                            <fieldset>
+                                                <div class="row main">
+                                                    <input type="hidden" name="EPS_MERCHANT" id="EPS_MERCHANT" class="form-control" value="{!merchantId}"/>
+                                                    <input type="hidden" name="EPS_TXNTYPE" id="EPS_TXNTYPE" class="form-control" value="{!transactionType}"/>
+                                                    <input type="hidden" name="EPS_REFERENCEID" id="EPS_REFERENCEID" class="form-control" value="{!paymentReference}"/>
+                                                    <input type="hidden" name="EPS_TIMESTAMP" id="EPS_TIMESTAMP" class="form-control" value="{!GMTtimestamp}"/>
+                                                    <input type="hidden" name="EPS_FINGERPRINT" class="form-control" id="EPS_FINGERPRINT" value="{!fingerprintValue}"/>
+                                                    <input type="hidden" name="EPS_RESULTURL" id="EPS_RESULTURL" class="form-control" value="{!resultURL}"/>
+                                                    <input type="hidden" name="EPS_REDIRECT" id="EPS_REDIRECT" class="form-control" value="{!redirect}"/>
+                                                    <input type="hidden" name="EPS_RESULTPARAMS" id="EPS_RESULTPARAMS" class="form-control" value="{!resultParams}"/>
+                                                    <input type="hidden" name="EPS_STORE" id="EPS_STORE" class="form-control" value="{!tokenStore}"/>
+                                                    <input type="hidden" name="EPS_STORETYPE" id="EPS_STORETYPE" class="form-control" value="{!tokenStoreType}"/>   
+                                                </div>                   
+                                                
+                                            </fieldset>
+                                            
+                                            <fieldset>
+                                                <div id="paymentMethodCreditCard">
+                                                    <div class="form-group col-md-6">
+                                                        <label for="EPS_CARDNUMBER" class="control-label"><h5 style="font-weight: 600; margin-top: 5px;margin-bottom: 5px;">Card Number
+                                                            <em>*</em></h5>
+                                                        </label>
+                                                        
+                                                        <div class="controls">
+                                                            <input type="text" id="EPS_CARDNUMBER" name="EPS_CARDNUMBER" class="form-control" maxlength="16" minlength="15" style="background: url() right center no-repeat;"
+                                                                   required="true"/>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="form-group col-md-6 extra-space">
+                                                        <label for="EPS_EXPIRYMONTH" class="control-label"><h5 style="font-weight: 600; margin-top: 5px;margin-bottom: 5px;">Expiry Date
+                                                            <em>*</em></h5>
+                                                        </label>
+                                                        
+                                                        <div class="row">
+                                                            <div class="col-xs-6">
+                                                                <select id="EPS_EXPIRYMONTH" name="EPS_EXPIRYMONTH" class="form-control" required="true" style="height:2.5em;">
+                                                                    <option disabled="true" selected="true" label="MM" value=""></option>
+                                                                    <apex:repeat value="{!monthsOfYear}" var="months" id="theRepeatMonths">
+                                                                        <option value="{!months}">{!months}</option>
+                                                                    </apex:repeat>
+                                                                </select>
+                                                            </div>
+                                                            
+                                                            <div class="col-xs-6">
+                                                                <select required="true" id="EPS_EXPIRYYEAR" name="EPS_EXPIRYYEAR" class="form-control" style="height:2.5em;">
+                                                                    <option disabled="true" selected="true" label="YYYY" value=""></option>
+                                                                    <apex:repeat value="{!expiryYear}" var="expiryYears" id="theRepeat">
+                                                                        <option value="{!expiryYears}">{!expiryYears}</option>
+                                                                    </apex:repeat>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="form-group col-md-6">
+                                                        <label for="nameOnCard" class="control-label"><h5 style="font-weight: 600; margin-top: 5px;margin-bottom: 5px;">Name on Card
+                                                            <em>*</em></h5>
+                                                        </label>
+                                                        
+                                                        <div class="controls">
+                                                            <input type="text" id="nameOnCard" name="nameOnCard" class="form-control" maxlength="50" required="true"/>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="form-group col-md-6 extra-space">
+                                                        <label for="EPS_CCV" class="control-label labelStyle"><h5 style="font-weight: 600; margin-top: 5px;margin-bottom: 5px;">CCV
+                                                            <em>*</em></h5>
+                                                        </label>
+                                                        <div class="controls">
+                                                            <div class="row">
+                                                                <div class="col-xs-6">
+                                                                    <input id="EPS_CCV" name="EPS_CCV" class="form-control inputTextStyle" minlength="3" maxlength="4" type="password" value="" required="true"/>
+                                                                </div>
+                                                                <div class="col-xs-6">
+                                                                    <span id="whatisthis">What is this?
+                                                                        <span style="top:-257%" >
+                                                                            <img src="{!$Resource.Payments+'/logos/Credit_card_cvv.jpeg'}" alt="Image showing CCV is located next to the signature panel" style="z-index : 110"/>
+                                                                        </span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                </div>
+                                <button id="UpdateCardButton" type="submit" onclick="return checkValidations();" class="btn btn-success btn-pay-now block" style="display: block; width: 100%; height : 10%; z-index : 100">Update Card Details</button>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                                <br/>
+                            </div>
+                            <!-- Iframe section end -->
+                            <br/>
+                            <br/>
+                        </form>
+                    </div>
+                </section>
+            </main> 
+            <script>
+            
+            window.addEventListener('load', function () {
+                document.getElementById('spinner').style.display = 'none';
+            }, false);
+            
+            function checkValidations(){
+                if(checkCreditCard() && runMyCheck()){
+                    var epsCCv = document.getElementById('EPS_CCV').value;
+                    if(epsCCv != '' && epsCCv != 'undefined' && epsCCv != undefined){
+                        document.getElementById('spinner').style.display = 'block';
+                    }
+                    return true;
+                }
+                else{
+                    return false;
+                }  
+            }
+            function runMyCheck(){
+                //update value every run
+                var expiry_month = document.getElementById("EPS_EXPIRYMONTH").value;
+                var expiry_year = document.getElementById("EPS_EXPIRYYEAR").value;
+                var card_name = document.getElementById("nameOnCard").value; 
+                var ccv = document.getElementById("EPS_CCV").value;
+                
+                var today = new Date();
+                var selDate = new Date();
+                
+                if(card_name == ""){
+                    alert ("\u2022Name on Card is blank. Please provide valid Name on Card.");
+                    return false;
+                }
+                if (today.getTime() > selDate.setFullYear(expiry_year, expiry_month-1)){
+                    alert ("\u2022Expiry Date is not valid. Please provide valid Expiry Date.");
+                    return false;
+                }else if(ccv == ""){
+                    alert ("\u2022CCV is blank. Please provide valid CCV.");
+                    return false;
+                }
+                else{
+                    return true;
+                }
+            }
+            
+            function checkCreditCard(){
+                re = /^((4\d{3})|(5[1-5]\d{2})|(6011))-?\d{4}-?\d{4}-?\d{4}|3[4,7]\d{13}$/;
+                var CREDITCARD = document.getElementById("EPS_CARDNUMBER").value;
+                if(!re.test(CREDITCARD)) {
+                    alert("\u2022Credit card is not valid. Please provide a valid credit card number.");
+                    return false;
+                }
+                else{
+                    return true;
+                }
+            }
+            </script>   
+        </body>
+    </html>
+</apex:page>

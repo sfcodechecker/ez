@@ -1,0 +1,66 @@
+<apex:page controller="UpdateCreditCardController" showHeader="false"  sidebar="false" lightningStylesheets="true" title="Stripe Payments | EzyCharge">
+    
+    <apex:form >
+        <head>
+            <style>
+                .slds-scope .slds-text-heading_small, .slds-scope .slds-text-heading--small {
+                font-size: 23.5px;
+                line-height: 35.25;
+                }
+                .slds-scope .slds-spinner_large, .slds-scope .slds-spinner--large {
+                width: 3.75rem;
+                }
+            </style>
+        </head>
+        <div style = "display:Block" id="spinner" class="slds-spinner_container">
+            <div class="slds-spinner--brand slds-spinner slds-spinner--large" aria-hidden="false" role="status">
+                <span class="slds-assistive-text">Please wait do not close.</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+            <div id="onloaderror" class="slds-grid slds-grid--align-center slds-text-heading--small">
+                Please wait do not close...
+            </div>
+        </div>
+        <div>
+            <br/><br/>
+            <center>
+                <article style="width:50%;" >
+                    <apex:outputPanel id="ReceiptPanel">
+                        <apex:includeLightning />
+                        <apex:Slds />
+                        <br/>
+                        <script>
+                        function refreshDetailPage(){
+                            var hostUrl = '{!JSENCODE(refreshPage)}';
+                            var result = '{!JSENCODE(result)}'; 
+                            if(!hostUrl.includes('https'))
+                                hostUrl = location.protocol+'//'+hostUrl; 
+                            var toastResponse = {type:'UpdateCardDetails',message:result};  
+                            try{opener.postMessage(toastResponse,hostUrl); window.close();} catch(err){console.log(err);}
+                        }
+                        window.addEventListener('load', function () {
+                            loadData();
+                        }, false);
+                        function hideSpinner(){
+                            refreshDetailPage();
+                            document.getElementById('spinner').style.display = 'none';
+                        }
+                        </script>
+                        
+                        <div class="slds-card__header slds-grid">
+                            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                            </header>
+                        </div>
+                        
+                        <div class="slds-card__body slds-card__body_inner">
+                            <!-- Transaction Detail -->            
+                            <div id="logotodisplay" /> 
+                        </div>
+                    </apex:outputPanel>
+                </article>
+            </center>
+        </div>
+        <apex:actionFunction name="loadData" action="{!updateStripeCard}" oncomplete="hideSpinner();" reRender="ReceiptPanel"></apex:actionFunction>
+    </apex:form>    
+</apex:page>

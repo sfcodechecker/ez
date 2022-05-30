@@ -1,0 +1,80 @@
+<aura:component implements="force:appHostable" controller="GateWaySetup" extends="c:MessageHandler">
+    <!-- attributes -->    
+    <aura:attribute name="GateWayData" type="Gateway_Detail__c" default="{}" /> 
+    <aura:attribute name="isOpen" type="boolean" default="false"/>     
+    <aura:attribute name="isConnected" type="boolean" default=""/>  
+    <aura:attribute name="showSpinner" type="Boolean" default="false"/>  
+    <aura:attribute name="isProduction" type="Boolean" default="false"/>   
+
+    <!-- handler methods -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <aura:registerEvent name="successfulAuthentication" type="c:GatewayEvent"/>
+    
+    <!-- Spinner -->
+    <aura:if isTrue="{!v.showSpinner}"> 
+        <div class="demo-only demo--inverse">
+            <div class="slds-spinner_container" style="z-index: 9999;">
+                <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                    <span class="slds-assistive-text"></span>
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                </div>
+            </div>
+        </div>
+    </aura:if>
+    
+    <div class="slds-modal__content">          
+        <div class="c-container">
+            <div class="{!v.isConnected ? 'slds-box Connected' : 'slds-box NotConnected' }" >
+                <a onclick="{!c.openModel}" data-value="Payway"> 
+                    <img src="{!$Resource.Payments+'/logos/BPointLogo.png'}" /> 
+                    <div class="slds-align_absolute-center">
+                        <aura:if isTrue="{!v.isConnected}">
+                            <lightning:icon iconName="utility:success" alternativeText="Connected" tooltip="Connected" variant="Success" />
+                            <aura:set attribute="else">
+                                <lightning:icon iconName="utility:error" alternativeText="Disconnected"  tooltip="Disconnected" variant="error" />
+                            </aura:set>
+                        </aura:if>
+                        <p>&nbsp;BPoint</p>
+                    </div>
+                </a>
+            </div> 
+        </div>
+        
+        <aura:if isTrue="{!v.isOpen}">
+            <!-- Modal Start -->
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1"
+                     class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container" style="top:9.6%;"> 
+                    <header class="slds-modal__header">                        
+                        <lightning:buttonIcon iconName="utility:close" onclick="{! c.closeModel }" alternativeText="close" size="large" 
+                                              variant="bare-inverse" class="slds-modal__close"/>
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">BPoint Gateway</h2>
+                    </header>
+                    <!-- Modal Body Start '/logos/Payway.png' -->
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        
+                        <img src="{!$Resource.Payments+'/logos/BPointLogo.png'}" style="height:40%;width:30%" class="slds-align_absolute-center" /> 
+                        <lightning:input type="toggle" checked="{!v.isProduction}" label="Environment" disabled="{!v.isConnected}" messageToggleActive="Production" messageToggleInactive="Sandbox"/>
+                        <lightning:input type="text" value="{!v.GateWayData.Q_Charge__Client_Id__c}" placeholder="Enter Username" disabled="{!v.isConnected}" />
+                        <lightning:input type="text" value="{!v.GateWayData.Q_Charge__Optional_Key_1__c}" placeholder="Enter Merchant Number" disabled="{!v.isConnected}"/>
+                        <lightning:input type="password" value="{!v.GateWayData.Q_Charge__Client_Key__c}" placeholder="Enter Password" disabled="{!v.isConnected}"/>
+                    </div>
+                    <!-- Modal Footer Start -->
+                    <footer class="slds-modal__footer">
+                        <lightning:button variant="neutral" label="Cancel" title="Cancel" onclick="{! c.closeModel }"/> 
+                        <aura:if isTrue="{!!v.isConnected}">
+                            <lightning:button variant="brand"  label="Login" title="Login" onclick="{! c.processLogin }"/>
+                            <aura:set attribute="else">
+                                <lightning:button variant="brand" label="You are already logged in. Want to Change Credentials?" title="Change Credentials?" onclick="{! c.ChangeLogin }"/>
+                            </aura:set>
+                        </aura:if>                        
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+            <!-- Modal End -->
+        </aura:if> 
+    </div> 
+    
+</aura:component>

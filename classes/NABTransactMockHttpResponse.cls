@@ -1,0 +1,31 @@
+global class NABTransactMockHttpResponse implements HttpCalloutMock{
+
+    global HttpResponse respond(HttpRequest req) {
+
+        String endPoint = req.getEndpoint();
+        HttpResponse res = new HttpResponse();
+        if((endPoint.startsWith(NABTransactManager.LiveURL) || endPoint.startsWith(NABTransactManager.TestDemoURL))  && req.getBody().contains('<RequestType>Echo</RequestType>')){            
+            res.setBody('<?xml version="1.0" encoding="UTF-8" standalone="no"?><NABTransactMessage><MessageInfo><messageID>20220703105422</messageID><messageTimestamp>20220703105422000000+000</messageTimestamp><apiVersion>xml-4.2</apiVersion></MessageInfo><RequestType>Echo</RequestType><Status><statusCode>000</statusCode><statusDescription>Normal</statusDescription></Status></NABTransactMessage>');
+            res.setStatusCode(200);            
+        }
+        else if((endPoint.startsWith(NABTransactManager.LiveRPURL) || endPoint.startsWith(NABTransactManager.TestRPURL)) && req.getBody().contains('<amount>100</amount>') ){ 
+            res.setBody('<?xml version="1.0" encoding="UTF-8" standalone="no"?><NABTransactMessage><MessageInfo><messageID>20221003114815</messageID><messageTimestamp>20221003224817160000+660</messageTimestamp><apiVersion>xml-4.2</apiVersion></MessageInfo><MerchantInfo><merchantID>XYZ0010</merchantID></MerchantInfo><Status><statusCode>0</statusCode><statusDescription>Normal</statusDescription></Status><RequestType>Periodic</RequestType><Periodic><PeriodicList count="1"><PeriodicItem ID="1"><actionType>trigger</actionType><crn>2441083982623330</crn><responseCode>00</responseCode><responseText>Approved</responseText><successful>yes</successful><periodicType>8</periodicType><amount>100</amount><currency>AUD</currency><txnID>759947</txnID><transactionReference>Transaction-a010p000003LlmqAAC</transactionReference><settlementDate>20220310</settlementDate><CreditCardInfo><pan>424242...242</pan><expiryDate>10/24</expiryDate><cardType>6</cardType><cardDescription>Visa</cardDescription></CreditCardInfo></PeriodicItem></PeriodicList></Periodic></NABTransactMessage>');
+            res.setStatusCode(200);
+        }
+        else if(endPoint.startsWith(NABTransactManager.LiveRPURL) || endPoint.startsWith(NABTransactManager.TestRPURL)){ 
+            res.setBody('<?xml version="1.0" encoding="UTF-8" standalone="no"?><NABTransactMessage><MessageInfo><messageID>20220803090242</messageID><messageTimestamp>20220803200243108000+660</messageTimestamp><apiVersion>xml-4.2</apiVersion></MessageInfo><MerchantInfo><merchantID>XYZ0010</merchantID></MerchantInfo><Status><statusCode>0</statusCode><statusDescription>Normal</statusDescription></Status><RequestType>Periodic</RequestType><Periodic><PeriodicList count="1"><PeriodicItem ID="1"><actionType>trigger</actionType><crn>4731798879812036</crn><responseCode>00</responseCode><responseText>Approved</responseText><successful>yes</successful><periodicType>8</periodicType><amount>500</amount><currency>AUD</currency><txnID>751220</txnID><transactionReference>Transaction-a010p000003LfH4AAK</transactionReference><settlementDate>20220308</settlementDate><CreditCardInfo><pan>456403...007</pan><expiryDate>02/30</expiryDate><cardType>6</cardType><cardDescription>Visa</cardDescription></CreditCardInfo></PeriodicItem></PeriodicList></Periodic></NABTransactMessage>');
+            res.setStatusCode(200);
+        } else if(endPoint.startsWith(NABTransactManager.LiveRPURL) || endPoint.startsWith(NABTransactManager.TestRPURL)){ 
+            res.setBody('<?xml version="1.0" encoding="UTF-8" standalone="no"?><NABTransactMessage><MessageInfo><messageID>20220803090242</messageID><messageTimestamp>20220803200243108000+660</messageTimestamp><apiVersion>xml-4.2</apiVersion></MessageInfo><MerchantInfo><merchantID>XYZ0010</merchantID></MerchantInfo><Status><statusCode>0</statusCode><statusDescription>Rejected</statusDescription></Status><RequestType>Periodic</RequestType><Periodic><PeriodicList count="1"><PeriodicItem ID="1"><actionType>trigger</actionType><crn>4731798879812036</crn><responseCode>00</responseCode><responseText>Invalid card number</responseText><successful>yes</successful><periodicType>8</periodicType><amount>100</amount><currency>AUD</currency><txnID>751220</txnID><transactionReference>Transaction-a010p000003LfH4AAK</transactionReference><settlementDate>20220308</settlementDate><CreditCardInfo><pan>456403...007</pan><expiryDate>02/30</expiryDate><cardType>6</cardType><cardDescription>Visa</cardDescription></CreditCardInfo></PeriodicItem></PeriodicList></Periodic></NABTransactMessage>');
+            res.setStatusCode(200);
+        }
+        else if(endPoint.startsWith(NABTransactManager.TestDemoURL) || endPoint.startsWith(NABTransactManager.LiveURL)){ 
+            res.setBody('<?xml version="1.0" encoding="UTF-8" standalone="no"?><NABTransactMessage><MessageInfo><messageID>20221103043035</messageID><messageTimestamp>20221103153036283000+660</messageTimestamp><apiVersion>xml-4.2</apiVersion></MessageInfo><RequestType>Payment</RequestType><MerchantInfo><merchantID>XYZ0010</merchantID></MerchantInfo><Status><statusCode>000</statusCode><statusDescription>Normal</statusDescription></Status><Payment><TxnList count="1"><Txn ID="1"><txnType>4</txnType><txnSource>23</txnSource><amount>100</amount><currency>AUD</currency><purchaseOrderNo>a010p000003LlmMAAS</purchaseOrderNo><approved>Yes</approved><responseCode>00</responseCode><responseText>Approved</responseText><settlementDate>20220311</settlementDate><txnID>762777</txnID><authID>343542</authID><CreditCardInfo><pan>424242...242</pan><expiryDate>10/24</expiryDate><cardType>6</cardType><cardDescription>Visa</cardDescription></CreditCardInfo></Txn></TxnList></Payment></NABTransactMessage>');
+            res.setStatusCode(200);
+        }
+        // One time payment never returns a HTTP response.
+        //else if(endPoint.startsWith(NABTransactManager.LiveOneOffURL) || endPoint.startsWith(NABTransactManager.TestOneOffURL)){ 
+        //}
+        return res;
+    }
+}

@@ -1,0 +1,21 @@
+<apex:page docType="html-5.0" controller="StripeCheckoutController" showHeader="false" lightningStylesheets="true" sidebar="false" title="Stripe Payments | EzyCharge">
+      
+    <apex:pageMessages />
+      
+    <apex:outputPanel rendered="{!GoodToRedirectToStripe}">        
+        <center> 
+            <h1> Please wait, do not close the window.</h1>
+        </center>        
+        <script src="https://js.stripe.com/v3/"> </script>        
+        <script>            
+            window.addEventListener("load", function load(event){
+                var stripe = Stripe('{!JSENCODE(publisher_key)}');
+                stripe.redirectToCheckout({
+                    sessionId: '{!JSENCODE(session_id)}'
+                }).then(function (result) {
+                    alert('Something went wrong. Please try again.');
+                });
+            },false);        
+        </script>        
+    </apex:outputPanel>
+</apex:page>

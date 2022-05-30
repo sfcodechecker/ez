@@ -1,0 +1,127 @@
+<aura:component extensible="true" access="global" >
+<!-- Validation messages for Charge Now Component--> 
+<aura:attribute name="NoGatewaysFound" type="String" default="No gateway found in the system, please refresh and check again. If the issue continues please contact system administrator."/>
+<aura:attribute name="NoGateway" type="String" default="Please choose a gateway."/>
+<aura:attribute name="RequiredFields" type="String" default="Please enter all the required fields."/>
+<aura:attribute name="AmtDateFrequency_NotSpecified" type="String" default="Please enter Amount, Installment Period and Installment Date for Recurring Payment."/>
+<aura:attribute name="AmtDate_NotSpecified" type="String" default="Please enter Amount and Installment Date for Recurring Payment."/>
+<aura:attribute name="AmtFreq_NotSpecified" type="String" default="Please enter Amount and Installment Period for Recurring Payment."/>
+<aura:attribute name="FreqDate_NotSpecified" type="String" default="Please enter Installment Period and Installment Date for Recurring Payment."/>
+<aura:attribute name="Frequency_NotSpecified" type="String" default="Please enter the Instalment Period for Recurring Payment."/>
+<aura:attribute name="InstallmentDate_NotSpecified" type="String" default="Please enter the Installment Date for Recurring Payment."/>
+<aura:attribute name="wentWrongMessage" type="String" default="Something went wrong due to "/>
+    <aura:attribute name="pleaseTryAgain" type="String" default="Please try again later."/>
+<aura:attribute name="ValidAmount" type="String" default="Please enter valid Amount."/>
+<aura:attribute name="AmountTwoDecimalPlaces" type="String" default="Amount cannot be charged, gateway supports only two decimal places. Please specify Amount accordingly."/>
+<aura:attribute name="AmountTwoDecimalPlacesUpdateRP" type="String" default="Amount cannot be updated, gateway supports only two decimal place. Please specify Amount accordingly."/>
+
+<aura:attribute name="PrevDate" type="String" default="Recurring Payment cannot be setup, gateway does not support an earlier date. Please specify today or future date."/>
+<aura:attribute name="PrevDateUpdateRP" type="String" default="Recurring Payment cannot be updated, gateway does not support an earlier date. Please specify today date or future date."/>
+
+<aura:attribute name="UpdateCardFailedRPClosed" type="String" default="Card details cannot be updated for closed Recurring Payment. Please create a new Recurring Payment."/>
+<aura:attribute name="RefundPendingWhileUpdateCard" type="String" default="Recurring Payment already has a refund pending. Updating card details will override the existing refund information."/>
+<aura:attribute name="UpdateRPFailedRPClosed" type="String" default="Recurring payment cannot be updated for closed Recurring Payment. Please create a new Recurring Payment."/>
+<aura:attribute name="RPAlreadyClosed" type="String" default="Unable to discontinue the Recurring Payment. Only open Recurring Payment can be discontinued."/>
+
+<aura:attribute name="UpdateCardDetailsOnDisconnectedGateway" type="String" default="Card details cannot be updated for the Recurring Payment. Gateway is not connected. Please connect to your gateway and try again."/>
+<aura:attribute name="UpdateRPOnDisconnectedGateway" type="String" default="Recurring payment cannot be updated. Gateway is not connected. Please connect to your gateway and try again."/>
+<aura:attribute name="DiscontinueRPOnDisconnectedGateway" type="String" default="Recurring payment cannot be closed. Gateway is not connected. Please connect to your gateway and try again."/>
+<aura:attribute name="RetryTransactionOnDisconnectedGateway" type="String" default="You cannot retry the transction. NAB Transact Gateway is not connected. Please connect to the gateway and try again."/>
+<aura:attribute name="CancelTransactionOnDisconnectedGateway" type="String" default="You cannot cancel the transction. NAB Transact Gateway is not connected. Please connect to the gateway and try again."/>
+
+<aura:attribute name="TransactionPaid" type="String" default="Transaction is already paid, you cannot cancel the Transaction."/>
+<aura:attribute name="TransactionCancelled" type="String" default="Transaction is already cancelled, you cannot cancel the Transaction."/>
+<aura:attribute name="TransactionPaidRetry" type="String" default="Transaction is already paid, you cannot retry the Transaction."/>
+<aura:attribute name="TransactionCancelledRetry" type="String" default="Transaction is already cancelled, you cannot retry the Transaction."/>
+<aura:attribute name="RetryScheduledTransaction" type="String" default="Transaction is scheduled, you cannot retry the Transaction."/>
+<aura:attribute name="CancelScheduledTransaction" type="String" default="Transaction is scheduled, you cannot cancel the Transaction."/>
+<aura:attribute name="FeatureOnlyNAB" type="String" default="This feature is only available for NAB Transact."/>
+<aura:attribute name="SomethingWentWrong" type="String" default="Something went wrong. Please refresh and try again, if still issue continues contact system administrator."/>
+<aura:attribute name="TransactionSuccessful" type="String" default="Transaction is charged successfully."/>
+<aura:attribute name="FrequenciesNotFound" type="String" default="Setup cannot be done, Installment Period not found. Please contact the system administrator."/>
+<aura:attribute name="GatewayConnected" type="String" default="is connected successfully."/>
+<aura:attribute name="GatewayConnectionFailed" type="String" default="Gateway cannot be setup, credentials are invalid. Please verify the credentials."/>
+
+
+<!-- Validation messages for Stripe-->
+<aura:attribute name="StripePKInvalid" type="String" default="Gateway cannot be setup. Publishable key provided is invalid. please provide a valid Publishable key."/>
+<aura:attribute name="StripeAmountLessThanHalfDollar" type="String" default="Amount cannot be charged, gateway supports Amount greater than $0.50 (AUD). Please specify Amount greater than $0.50 (AUD)."/>
+<aura:attribute name="StripeAmountLessThanZero" type="String" default="Amount cannot be charged, gateway supports Amount greater than $0.00 AUD. Please specify Amount greater than $0.00 AUD."/>
+<aura:attribute name="StripeAmountLessThanMillion" type="String" default="Amount cannot be charged, gateway supports Amount less than or equal to $999,999.99 (AUD). Please specify Amount less than or equal to the limit $999,999.99 (AUD)."/>
+<aura:attribute name="StripeAmountLessThanHalfDollarUpdateRP" type="String" default="Amount cannot be updated, gateway supports Amount greater than $0.50 (AUD). Please specify Amount greater than $0.50 (AUD)."/>
+<aura:attribute name="StripeAmountLessThanZeroUpdateRP" type="String" default="Amount cannot be updated, gateway supports Amount greater than $0.00 (AUD). Please specify Amount greater than $0.00 (AUD)."/>
+<aura:attribute name="StripeAmountLessThanMillionUpdateRP" type="String" default="Amount cannot be updated, gateway supports Amount less than or equal to $999,999.99 (AUD). Please specify Amount less than or equal to the limit $999,999.99 (AUD)."/>
+
+
+
+<!-- Validation messages for Simplify-->
+<aura:attribute name="PkAndSkSimplify" type="String" default="Gateway cannot be setup. Hosted Payments Public key and Hosted Payments Private key are empty. Please specify valid Hosted Payments Public key and Hosted Payments Private key." />
+<aura:attribute name="PkSimplify" type="String" default="Gateway cannot be setup. Hosted Payments Public key is empty. Please specify valid Hosted Payments Public key." />
+<aura:attribute name="SkSimplify" type="String" default="Gateway cannot be setup. Hosted Payments Private key is empty. Please specify valid Hosted Payments Private key." />
+<aura:attribute name="PkInvalidSimplify" type="String" default="Gateway cannot be setup. Hosted Payments Public key is invalid. Please specify valid Hosted Payments Public key." />
+<aura:attribute name="PkSKSameSimplify" type="String" default="Gateway cannot be setup. Hosted Payments Public key and Hosted Payments Private key are same. Please specify valid Hosted Payments Public key and Hosted Payments Private key." />
+
+<aura:attribute name="SimplifyAmountLessThanOne" type="String" default="Amount cannot be charged, gateway supports Amount greater than or equal to $1.00 (AUD). Please specify Amount greater than or equal to limit $1.00 (AUD)." />
+<aura:attribute name="SimplifyAmountLessThanHalfDollar" type="String" default="Amount cannot be charged, gateway supports Amount greater than or equal to $0.50 (AUD). Please specify Amount greater than or equal to limit $0.50 (AUD)." />
+<aura:attribute name="SimplifyAmountLessThanHalfMillion" type="String" default="Amount cannot be charged, gateway supports Amount less than or equal to $500,000 (AUD). Please specify Amount less than or equal to limit $500,000 (AUD)."/>
+<aura:attribute name="SimplifyAmountLessThanHundredThousand" type="String" default="Amount cannot be charged, gateway supports Amount less than equal to $10,000.00 (AUD). Please specify Amount less than equal to limit $10,000.00 (AUD)." />
+<aura:attribute name="SimplifyAmountLessThanHalfDollarUpdateRP" type="String" default="Amount cannot be updated, gateway supports Amount greater than or equal to $0.50 (AUD). Please specify Amount greater than or equal to limit $0.50 (AUD)." />
+<aura:attribute name="SimplifyAmountLessThanHundredThousandUpdateRP" type="String" default="Amount cannot be updated, gateway supports Amount less than $10,000.00 (AUD). Please specify Amount less than limit $10,000.00 (AUD)." />
+
+
+<!--Validation messages for Ezidebit-->
+<aura:attribute name="PkAndSkEzidebit" type="String" default="Gateway cannot be setup. Public key and Digital key provided are empty. Please specify valid Public key and Digital key." />
+<aura:attribute name="PkEzidebit" type="String" default="Gateway cannot be setup. Public key provided is not valid. Please specify valid Public key." />
+<aura:attribute name="SkEzidebit" type="String" default="Gateway cannot be setup. Digital key provided is not valid. Please specify valid Digital key." />
+<aura:attribute name="PkEzidebitEmpty" type="String" default="Gateway cannot be setup. Public key is empty. Please specify valid Public key." />
+<aura:attribute name="SkEzidebitEmpty" type="String" default="Gateway cannot be setup. Digital key is empty. Please specify valid Digital key." />    
+
+
+<aura:attribute name="EzidebitAmountLessThanOne" type="String" default="Amount cannot be charged, gateway supports Amount greater than or equal to $1.00 (AUD). Please specify Amount greater than or equal to limit $1.00 (AUD)." />
+<aura:attribute name="EzidebitAmountLessThanTenThousand" type="String" default="Amount cannot be charged, gateway supports Amount less than or equal to $10,000 (AUD). Please specify Amount less than or equal to limit $10,000 (AUD)."/>
+<aura:attribute name="EzidebitAmountLessThanOneUpdateRP" type="String" default="Amount cannot be updated, gateway supports Amount greater than or equal to $1.00 (AUD). Please specify Amount greater than or equal to limit $1.00 (AUD)." />
+<aura:attribute name="EzidebitAmountLessThanTenThousandUpdateRP" type="String" default="Amount cannot be updated, gateway supports Amount less than or equal to $10,000 (AUD). Please specify Amount less than or equal to limit $10,000 (AUD)."/>
+
+
+<!--Validation messages for PayWay-->
+<aura:attribute name="PkMerchantSkPayway" type="String" default="Gateway cannot be setup. Publishable key, Secret key and Merchant Id are empty. Please specify a valid Publishable key, Secret key and Merchant Id." />
+<aura:attribute name="PkAndSkPayway" type="String" default="Gateway cannot be setup. Publishable key and Secret key are empty. Please specify a valid Publishable key and Secret key." />
+<aura:attribute name="PkAndMerchantPayway" type="String" default="Gateway cannot be setup. Publishable key and Merchant Id are empty. Please specify a valid Publishable key and Merchant Id." />
+<aura:attribute name="SkAndMerchantPayway" type="String" default="Gateway cannot be setup. Secret key and Merchant Id are empty. Please specify a valid Secret key and Merchant Id." />
+
+<aura:attribute name="PkPayway" type="String" default="Gateway cannot be setup. Publishable key is empty. Please specify valid Publishable key." />
+<aura:attribute name="SkPayway" type="String" default="Gateway cannot be setup. Secret key is empty. Please specify valid Secret key." />
+<aura:attribute name="MerchantIdPayway" type="String" default="Gateway cannot be setup. Merchant Id is empty. Please specify valid Merchant Id." />
+
+<aura:attribute name="PayWayAmountLessThanOne" type="String" default="Amount cannot be charged, gateway supports Amount greater than or equal to $0.01 (AUD). Please specify Amount greater than or equal to limit $0.01 (AUD)." />
+<aura:attribute name="PayWayAmountLessThanTenThousand" type="String" default="Amount cannot be charged, gateway supports Amount less than or equal to $10,000 (AUD). Please specify Amount less than or equal to limit $10,000 (AUD)."/>
+<aura:attribute name="PayWayAmountLessThanOneUpdateRP" type="String" default="Amount cannot be updated, gateway supports Amount greater than or equal to $0.01 (AUD). Please specify Amount greater than or equal to limit $0.01 (AUD)." />
+<aura:attribute name="PayWayAmountLessThanTenThousandUpdateRP" type="String" default="Amount cannot be updated, gateway supports Amount less than or equal to $10,000 (AUD). Please specify Amount less than or equal to limit $10,000 (AUD)."/>
+
+
+
+<!--Validation messages for NABTransact-->
+<aura:attribute name="NABAmountLessThanOne" type="String" default="Amount cannot be charged, gateway supports Amount greater than or equal to $0.01 (AUD). Please specify Amount greater than or equal to limit $0.01 (AUD)." />
+<aura:attribute name="NABAmountLessThanOneDollar" type="String" default="Amount cannot be charged, gateway supports Amount greater than or equal to $1.00 (AUD). Please specify Amount greater than or equal to limit $1.00 (AUD)." />
+<aura:attribute name="NABAmountLessThanTenThousand" type="String" default="Amount cannot be charged, gateway supports Amount less than or equal to $10,000 (AUD). Please specify Amount less than or equal to limit $10,000 (AUD)."/>
+<aura:attribute name="NABAmountLessThanTenBillion" type="String" default="Amount cannot be charged, gateway supports Amount less than or equal to $99,999,999.99 (AUD). Please specify Amount less than or equal to limit $99,999,999.99 (AUD)."/>
+<aura:attribute name="NABAmountLessThanOneDollarUpdateRP" type="String" default="Amount cannot be updated, gateway supports Amount greater than or equal to $0.01 (AUD). Please specify Amount greater than or equal to limit $0.01 (AUD)." />
+<aura:attribute name="NABAmountLessThanTenBillionUpdateRP" type="String" default="Amount cannot be updated, gateway supports Amount less than or equal to $99,999,999.99 (AUD). Please specify Amount less than or equal to limit $99,999,999.99 (AUD)."/>
+
+<!--Validation messages for BPoint-->
+<aura:attribute name="UsrMrchntpassBpoint" type="String" default="Gateway cannot be setup. Username, Merchant Number and Password are empty. Please specify a valid Username, Merchant Number and Password." />
+<aura:attribute name="UsrAndPassBpoint" type="String" default="Gateway cannot be setup. Username and Password are empty. Please specify a valid Username and Password." />
+<aura:attribute name="PkAndMerchantBpoint" type="String" default="Gateway cannot be setup. Username and Merchant Number are empty. Please specify a valid Username and Merchant Number." />
+<aura:attribute name="SkAndMerchantBpoint" type="String" default="Gateway cannot be setup. Merchant Number and Password are empty. Please specify a valid Merchant Number and Password." />
+
+<aura:attribute name="UsrBpoint" type="String" default="Gateway cannot be setup. Username is empty. Please specify valid Username." />
+<aura:attribute name="PassBpoit" type="String" default="Gateway cannot be setup. Password is empty. Please specify valid Password." />
+<aura:attribute name="MerchantBpoint" type="String" default="Gateway cannot be setup. Merchant Number is empty. Please specify valid Merchant Number." />
+
+
+<div>{!v.body}</div>
+
+
+
+
+</aura:component>

@@ -1,0 +1,79 @@
+<aura:component implements="force:lightningQuickActionWithoutHeader,force:hasRecordId,forceCommunity:availableForAllPageTypes" controller="ChargeNowController" access="global" extends="c:MessageHandler">
+    <!-- attributes -->
+    <aura:attribute name="GatewayList" type="List" /> 
+    <aura:attribute name="SelectedGateway" type="String" />     
+    <aura:attribute name="ChargeAmount" type="Double" /> 
+    <aura:attribute name="FrequencyList" type="List" />
+    <aura:attribute name="SelectedFrequency" type="String" /> 
+    <aura:attribute name="SelectedChargeType" type="String" default="onetime" /> 
+    <aura:attribute name="ChargeTypes" type="List" default="[{'label':'One Time',value:'onetime'},
+                                                            {'label':'Recurring',value:'recurring'}]"/>
+    <aura:attribute name="isRecurring" type="Boolean" default="false"/>
+    <aura:attribute name="ChargeButtonLabel" type="String" default="Charge" /> 
+    <aura:attribute name="SelectedInstalmentDate" type="String" /> 
+    <aura:attribute name="MinimumInstalmentDate" type="String" /> 
+    <aura:attribute name="showSpinner" type="Boolean" default="false" />
+    
+    <!-- handler methods -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    
+    <aura:if isTrue="{!v.showSpinner}">
+        <lightning:spinner alternativeText="loading..." variant="brand" size="medium" />
+    </aura:if>
+    
+    <!-- Modal Start -->    
+    <header class="slds-modal__header"> 
+        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Charge Now</h2> 
+    </header>
+    <div class="slds-modal__content">   
+        <!--<lightning:tabset variant="scoped" selectedTabId="onetime" >
+            <lightning:tab onactive="{!c.handleActiveTab}" label="One Time" id="onetime">                
+                <div class="c-container" style="height: 20rem;">                   
+                    <lightning:combobox label="Gateway Name" options="{!v.GatewayList}" value="{!v.SelectedGateway}" onchange="{!c.handleGatewayChange}" />
+                    <br/>
+                    <lightning:input type="number" label="Amount" value="{!v.ChargeAmount}" required="true" formatter="currency" step="0.01"/>
+                </div>
+            </lightning:tab>
+            <lightning:tab onactive="{!c.handleActiveTab}" label="Recurring" id="recurring">  
+                <div class="c-container" style="height: 20rem;">  
+                    <lightning:combobox label="Gateway Name" options="{!v.GatewayList}" value="{!v.SelectedGateway}" onchange="{!c.handleGatewayChange}" />
+                    <br/>
+                    <lightning:input type="number" label="Amount" value="{!v.ChargeAmount}" required="true" formatter="currency" step="0.01"/>
+                    <br/>
+                    <lightning:combobox label="Installment Period" options="{!v.FrequencyList}" required="true" value="{!v.SelectedFrequency}" onchange="{!c.handleFrequencyChange}" />
+                    <br/>
+                    <lightning:input type="date" name="Instalment Date" label="Installment Date" required="true" value="{!v.SelectedInstalmentDate}" min="{!v.MinimumInstalmentDate}" />
+                    <br/>
+                    <h6 style="font-weight: bold;font-size:small;">*We will charge $1 to validate the credit card. Amount will be refunded within 2 or 3 business days.</h6>
+                </div>
+            </lightning:tab> 
+        </lightning:tabset>-->
+        <div class="c-container" style="height: 23rem;">                   
+            <lightning:combobox label="Gateway Name" options="{!v.GatewayList}" value="{!v.SelectedGateway}" onchange="{!c.handleGatewayChange}" />
+            <br/>
+            <lightning:combobox label="Charge Type" options="{!v.ChargeTypes}" value="{!v.SelectedChargeType}" onchange="{!c.handleChargeTypeChange}" />
+            <br/>
+            <lightning:input type="number" label="Amount" value="{!v.ChargeAmount}" required="true" formatter="currency" step="0.01"/>
+            <br/>
+            <aura:if isTrue="{!v.isRecurring}">
+                <lightning:combobox label="Installment Period" options="{!v.FrequencyList}" required="true" value="{!v.SelectedFrequency}" onchange="{!c.handleFrequencyChange}" />
+                    <br/>
+                    <lightning:input type="date" name="Instalment Date" label="Installment Date" required="true" value="{!v.SelectedInstalmentDate}" min="{!v.MinimumInstalmentDate}" />
+                    <br/>
+                </aura:if>
+        </div>
+
+    </div>  
+    <footer class="slds-modal__footer">
+        <div>
+        <aura:if isTrue="{!v.isRecurring}">
+                <span  class="slds-float_left" style="font-weight: bold;font-size:small;">Important Information</span>
+                &nbsp;<lightning:helptext class="slds-float_left" content="We will charge $1 to validate the credit card. Amount will be refunded within 2 or 3 business days.">Important Information</lightning:helptext>
+            </aura:if>
+        <lightning:button variant="neutral"  label="Cancel" title="Cancel" onclick="{! c.closeModel }"/>  
+        <lightning:button variant="brand"    label="{!v.ChargeButtonLabel}" title="{!v.ChargeButtonLabel}" onclick="{! c.chargePayment }"/>
+    </div>
+
+    </footer>          
+    <!-- Modal End -->
+</aura:component>

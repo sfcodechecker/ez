@@ -1,0 +1,36 @@
+<aura:component implements = "force:lightningQuickActionWithoutHeader,force:hasRecordId" controller = "CancelTransactionController" extends="c:MessageHandler">
+<!-- attributes -->
+<aura:attribute name="GatewayName" type="String"/>
+<aura:attribute name="showSpinner" type="Boolean" default="false" />
+<aura:attribute name="recordId" type="String" />
+<aura:attribute name="showModel" type="Boolean" default="false" />
+
+<!-- handler methods -->
+<aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+<aura:if isTrue="{!v.showSpinner}">
+<lightning:spinner alternativeText="loading..." variant="brand" size="medium" />
+</aura:if>
+
+<aura:if isTrue="{!v.showModel}">
+    <!-- Modal Start -->    
+    <header class="slds-modal__header"> 
+        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Cancel Transaction</h2> 
+    </header>
+
+    <div class="slds-modal__content">
+        <br/>
+        <center>Please click on "Confirm" to cancel this transaction</center>
+        <br/>
+    </div>
+
+    <footer class="slds-modal__footer">
+        <div>
+        <lightning:button variant="neutral"  label="Cancel" title="Cancel" onclick="{! c.closeModal }"/>  
+        <lightning:button variant="brand"  label="Confirm" title="Confirm" onclick="{! c.confirm }" disabled="{!v.isDisabled}"/>
+    </div>
+
+    </footer>
+</aura:if>
+
+</aura:component>

@@ -1,0 +1,135 @@
+<apex:page controller="SimplifyCheckOutController" title="Simplify Payment | Ezy Charge" showHeader="false" standardStylesheets="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">
+    
+    <apex:pageMessages />
+   
+    <div style = "display:none" id="spinner" class="slds-spinner_container">
+        <div class="slds-spinner--brand slds-spinner slds-spinner--large" aria-hidden="false" role="status">
+        </div>
+        <div id="onloaderror" class="slds-grid slds-grid--align-center slds-text-heading--small">
+        </div>
+    </div>
+    <apex:form >
+        <apex:outputPanel id="checkoutPanel" rendered="{!errorMessage =='' || errorMessage==null}">
+            <apex:includeScript value="{!URLFOR($Resource.Payments,'/JS/simplifypay.js')}"/>
+            
+            <html lang="en">
+                <head>
+                    <title>Simplify Payment | Ezy Charge</title>
+                    <meta charset="utf-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1" />
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/SimplifyCheckout.css')}"/>
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/v4.0.0bootstrap.min.css')}"/>
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/font.css')}"/>
+                <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/style.css')}"/>
+                </head>
+                <body>
+                    <main class="page payment-page" id="mainform">
+                        <section class="payment-form dark">
+                            <div class="container">
+                                <form id="payform" >
+                                    <apex:outputPanel id="theOneTimePanel" layout="block" rendered="{!chargeType == 'OneTime'}" >
+                                        <div class="products">
+                                            <div class="container text-center">
+                                                <apex:image alt="Payway Pty Ltd" url="{!URLFOR($Resource.Payments,'logos/SimplifyCheckoutLogo.png')}" width="17%" height="17%"/>
+                                            </div>
+                                            <br/>
+                                            <h3 class="title">Checkout Details</h3>
+                                            <div class="item">
+                                                
+                                                <div style="{!IF(Name != null, 'display:block', 'display:none')}">
+                                                    <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(Name)}</span>
+                                                    <p class="item-name">Name</p>
+                                                </div>
+                                                <div style="{!IF(email != null, 'display:block', 'display:none')}">
+                                                    <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(email)}</span>
+                                                    <p class="item-name">Email</p>
+                                                </div>
+                                                <div style="{!IF(paymentAmount != null, 'display:block', 'display:none')}">
+                                                    <span class="price"> :&nbsp;&nbsp;&nbsp;${!HTMLENCODE(paymentAmount)} (AUD)</span>
+                                                    <p class="item-name">Amount</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel id="theRecurringPanel" layout="block" rendered="{!chargeType == 'Recurring'}" >
+                                        <div class="products">
+                                            <div class="container text-center">
+                                                <apex:image alt="Simlify Pty Ltd" url="{!URLFOR($Resource.Payments,'logos/SimplifyCheckoutLogo.png')}" width="17%" height="17%"/>
+                                            </div>
+                                            <h3 class="title">Checkout Details</h3>
+                                            <div class="item">
+                                                <div style="{!IF(Name != null, 'display:block', 'display:none')}">
+                                                    <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(Name)}</span>
+                                                    <p class="item-name">Name</p>
+                                                </div>
+                                                <div style="{!IF(email != null, 'display:block', 'display:none')}">
+                                                    <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(email)}</span>
+                                                    <p class="item-name">Email </p>
+                                                </div>
+                                                <div style="{!IF(paymentAmount != null, 'display:block', 'display:none')}">
+                                                    <span class="price"> :&nbsp;&nbsp;&nbsp;${!HTMLENCODE(paymentAmount)} (AUD)</span>
+                                                    <p class="item-name">Regular Amount </p>
+                                                </div>
+                                                <div style="{!IF(paymentDate != null, 'display:block', 'display:none')}">
+                                                    <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(paymentDate)}</span>
+                                                    <p class="item-name">First Installment Date </p>
+                                                </div>
+                                                <div style="{!IF(frequency != null, 'display:block', 'display:none')}">
+                                                    <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(frequency)}</span>
+                                                    <p class="item-name">Installment Period</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </apex:outputPanel>
+                                    <div class="products">
+                                        <h3 class="title">Credit Card Details</h3>
+                                        <!-- Iframe section start -->
+                                        <center>
+                                            <iframe name="simplify-hosted-form"
+                                                    data-sc-key="{!JSENCODE(hostedpayments_publicKey)}"
+                                                    data-amount="{!JSENCODE(amount)}"
+                                                    data-color="#12B830"
+                                                    data-operation="{!JSENCODE(operation)}"
+                                                    style="border: none;height: 450px;width: 100%;overflow: hidden;">
+                                            </iframe>
+                                        </center>
+                                        <!-- Iframe section end -->
+                                    </div>
+                                    <br/>
+                                    <br/>
+                                </form>
+                            </div>
+                        </section>
+                    </main>    
+                </body>
+                <script>
+                var chargeType='{!JSENCODE(chargeType)}';
+                SimplifyCommerce.hostedPayments(
+                    function(response) {
+                        var iframes = document.querySelectorAll('iframe');
+                        for (var i = 0; i < iframes.length; i++) {
+                            iframes[i].parentNode.removeChild(iframes[i]);
+                        }
+                        document.getElementById('spinner').style.display = 'block';
+                        if(chargeType=='OneTime'){
+                            var responseMap={"transactionId":response.data.id,"transactionStatus":response.data.paymentStatus,"transactionDateTime":response.data.transactionData.date};
+                            completeCheckout(JSON.stringify(responseMap));
+                        }else if(chargeType=='Recurring'){
+                            completeCheckout(response.cardToken);
+                        }
+                    }
+                );
+                
+                
+                function redirect(){
+                    var redirectUrl='{!JSENCODE(redirectUrl)}';
+                    window.location.href=redirectUrl;
+                }
+                </script>
+            </html>
+            <apex:actionFunction name="completeCheckout" action="{!completeCheckout}" oncomplete="redirect();"  reRender="checkoutPanel">
+                <apex:param name="responseToken" value="{!responseToken}" assignTo="{!responseToken}"/>
+            </apex:actionFunction>
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>

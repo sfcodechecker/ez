@@ -1,0 +1,149 @@
+<apex:page docType="html-5.0" controller="UpdateCreditCardController" showHeader="false" lightningStylesheets="true" sidebar="false" title="PayWay Payments | EzyCharge">
+    <apex:pageMessages id="apexmsg"/>
+    <apex:form id="paywayForm">
+        
+        <html lang="en">
+            <head>
+                <title>PayWay Payments | EzyCharge</title>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/PaywayCheckout.css')}"/>
+                <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/v4.0.0bootstrap.min.css')}"/>
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/font.css')}"/>
+                <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/style.css')}"/>
+                
+                <div class="overlay" style="display: block;" id="spinner">
+                    <div class="overlay__wrapper">
+                        <div class="overlay__spinner"></div>
+                    </div>
+                    <p class="wait" style="Text-align : center; font-size: 22px;font-weight: 600;margin-top: -44%; color: gainsboro;">Please wait do not close.</p>
+                </div>
+            </head>
+            <body>
+                <main class="page payment-page" id="mainform">
+                    <section class="payment-form dark">
+                        <div class="container">
+                            <form id="payform" >
+                                <div class="products">
+                                    <div class="container text-center">
+                                        <apex:image alt="Payway Pty Ltd" url="{!URLFOR($Resource.Payments,'logos/westpac.png')}" width="30%" height="20%"/>
+                                    </div>
+                                    <br/>
+                                    <h3 class="title">Recurring Payment Details</h3>
+                                    <div style="{!IF(rpName != null, 'display:block', 'display:none')}">
+                                        <div class="item">
+                                            <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(rpName)}</span>
+                                            <p class="item-name">Recurring Payment</p>
+                                        </div>
+                                    </div>
+                                    <div style="{!IF(showAmount != null, 'display:block', 'display:none')}">
+                                        <div class="item">
+                                            <span class="price"> :&nbsp;&nbsp;&nbsp;${!HTMLENCODE(showAmount)} (AUD)</span>
+                                            <p class="item-name">Regular Amount</p>
+                                        </div>
+                                    </div>
+                                    <div style="{!IF(nextPayDate != null, 'display:block', 'display:none')}">
+                                        <div class="item">
+                                            <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(nextPayDate)}</span>
+                                            <p class="item-name">Next Installment Date</p>
+                                        </div>
+                                    </div>
+                                    <div style="{!IF(installperiod != null, 'display:block', 'display:none')}">
+                                        <div class="item">
+                                            <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(installperiod)}</span>
+                                            <p class="item-name">Installment Period</p>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                <div class="products">
+                                    <h3 class="title">Credit Card Details</h3>
+                                    <div class="iframe">
+                                        <div id="payway-credit-card">
+                                        </div>
+                                    </div>                        
+                                </div>
+                                <div class="form-group col-sm-12">
+                                    <button type="button" id="pay" class="btn btn-primary btn-block">Update Card</button>
+                                    <br/>
+                                    <br/>
+                                    <br/>
+                                    <br/>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                </main>    
+            </body>
+            <script>
+            
+            window.addEventListener('load', function () {
+                    document.getElementById('spinner').style.display = 'none';
+                }, false);
+            
+            const payButton = document.getElementById( "pay" );
+            let creditCardFrame = null;
+            
+            const tokenCallback = function( err, data ) {
+                if ( err ) {
+                    if(!alert("Some required card details were not provided. Please enter all the credentials to continue the transaction."))
+                    {
+                        console.log('Errors on iframe'+err.message);
+                    }
+                } 
+                else{
+                    var std = data.singleUseTokenId;
+                    createLog(std);
+                    document.getElementById("spinner").style.display = "block";
+                }
+                payButton.disabled = false;
+            };
+            
+            function onCompleteHandler(){
+                var result='{!JSENCODE(result)}';
+                if(!result.includes('/apex')){
+                    var hosturl='{!JSENCODE(refreshPage)}';
+                    var message={type:"UpdateCardDetails",message:result};
+                    try{
+                        opener.postMessage(message,hosturl);
+                        window.close();
+                    }catch(err){
+                        alert(err);
+                    }
+                }
+                else{
+                    window.location.href=result;
+                }
+            };
+            
+            payButton.onclick = function() {
+                payButton.disabled = true;
+                creditCardFrame.getToken( tokenCallback );
+            };
+            
+            const createdCallback = function( err, frame ) {
+                if ( err ) {
+                    console.error( "Error creating frame: " + err.message );
+                } else {
+                    creditCardFrame = frame;
+                }
+            };
+            
+            const options = {
+                publishableApiKey: "{!JSENCODE(publishableKey)}",
+                cvnRequired:"true",
+                tokenMode: "callback",
+                layout: "narrow",
+                onValid: function() { payButton.disabled = false; },
+                onInvalid: function() { payButton.disabled = true; }
+            };
+            payway.createCreditCardFrame( options, createdCallback );
+            </script>
+            <apex:includeScript value="{!URLFOR($Resource.Payments,'/JS/payway.js')}"></apex:includeScript>
+        </html>
+        
+        <apex:actionFunction name="createLog" action="{!updatePaywayCard}" oncomplete="onCompleteHandler();" reRender="paywayForm" status="myAjaxStatus">
+            <apex:param name="createLog" value="{!singleUseTokenId}" assignTo="{!singleUseTokenId}"/>
+        </apex:actionFunction>
+    </apex:form>
+</apex:page>

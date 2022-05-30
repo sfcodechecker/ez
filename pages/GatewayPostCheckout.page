@@ -1,0 +1,70 @@
+<apex:page controller="GatewayPostCheckoutController" lightningStylesheets="true" title="EzyCharge Payments | EzyCharge" sidebar="false">
+<apex:pageMessages />
+<apex:outputPanel id="renderPanel" rendered="{!errorMessage=='' || errorMessage==null}">
+<apex:form >
+
+<head>
+    <style>
+        .slds-scope .slds-text-heading_small,
+        .slds-scope .slds-text-heading--small {
+            font-size: 23.5px;
+            line-height: 37.25;
+        }
+        
+        .slds-scope .slds-spinner_large,
+        .slds-scope .slds-spinner--large {
+            width: 3.75rem;
+        }
+    </style>
+</head>
+<!--spinner -->
+<div style="display:Block" id="spinner" class="slds-spinner_container">
+    <div class="slds-spinner--brand slds-spinner slds-spinner--large" aria-hidden="false" role="status">
+        <span class="slds-assistive-text">{!HTMLENCODE(spinnerMessage)}</span>
+        <div class="slds-spinner__dot-a"></div>
+        <div class="slds-spinner__dot-b"></div>
+    </div>
+    <div id="onloaderror" class="slds-grid slds-grid--align-center slds-text-heading--small">
+        {!HTMLENCODE(spinnerMessage)}
+    </div>
+</div>
+<div>
+    <br/>
+    <br/>
+    <apex:outputPanel id="ReceiptPanel">
+    <apex:includeLightning />
+    <apex:Slds />
+    <br/>
+    <script>
+        /******function to refresh the detail page***/
+        function refreshDetailPage() {
+            window.close();
+        }
+        window.addEventListener('load', function () {
+            loadData();
+        }, false);
+        
+        /**function to hide the spinner**/
+        function hideSpinner() {
+            document.getElementById('spinner').style.display = 'none';
+        }
+        
+        function redirectToReceipt(){
+            var returnUrl='{!JSENCODE(redirectUrl)}';
+            if(returnUrl.includes('/apex')){
+                window.location.href = returnUrl;
+            }else{
+                hideSpinner();
+            }
+        }
+    </script>
+    
+</apex:outputPanel>
+
+<br/>
+
+</div>
+<apex:actionFunction name="loadData" action="{!completePayment}" oncomplete="redirectToReceipt();" reRender="renderPanel"></apex:actionFunction>
+</apex:form>
+</apex:outputPanel>
+</apex:page>

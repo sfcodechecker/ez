@@ -1,0 +1,126 @@
+<apex:page controller="UpdateCreditCardController" title="Simplify Payment | Ezy Charge" >
+    
+    <apex:pageMessages />
+
+    <div style = "display:none" id="spinner" class="slds-spinner_container">
+        <div class="slds-spinner--brand slds-spinner slds-spinner--large" aria-hidden="false" role="status">
+            <div class="slds-spinner__dot-a"></div>
+            <div class="slds-spinner__dot-b"></div>
+        </div>
+        <div id="onloaderror" class="slds-grid slds-grid--align-center slds-text-heading--small">
+        </div>
+    </div>
+    
+    <apex:form style="overflow: hidden;">
+        <apex:outputPanel id="checkoutPanel" rendered="{!errorMessage=='' || errorMessage==null}">
+            <apex:includeScript value="{!URLFOR($Resource.Payments,'/JS/simplifypay.js')}"/>
+            
+            <html lang="en">
+                <head>
+                    <title>Simplify Payment | Ezy Charge</title>
+                    <meta charset="utf-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1" />
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/SimplifyCheckout.css')}"/>
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/v4.0.0bootstrap.min.css')}"/>
+                    <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/font.css')}"/>
+                <apex:stylesheet value="{!URLFOR($Resource.Payments,'/css/style.css')}"/>
+                </head>
+                <body>
+                    <main class="page payment-page" id="mainform">
+                        <section class="payment-form dark">
+                            <div class="container">
+                                <form id="payform" >
+                                    <div class="products">
+                                        <div class="container text-center">
+                                            <apex:image alt="Simplify Pty Ltd" url="{!URLFOR($Resource.Payments,'logos/SimplifyCheckoutLogo.png')}" width="17%" height="17%"/>
+                                        </div>
+                                        <div class="slds-text-heading_medium" style="font-weight: 600;">Recurring Payment Details
+                                            <h3 class="title"></h3>
+                                        </div>
+                                        
+                                        <div style="{!IF(rpName != null, 'display:block', 'display:none')}">
+                                            <div class="item">
+                                                <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(rpName)}</span>
+                                                <p class="item-name">Recurring Payment</p>
+                                            </div>
+                                        </div>
+                                        <div style="{!IF(showAmount != null, 'display:block', 'display:none')}">
+                                            <div class="item">
+                                                <span class="price"> :&nbsp;&nbsp;&nbsp;${!HTMLENCODE(showAmount)} (AUD)</span>
+                                                <p class="item-name">Regular Amount</p>
+                                            </div>
+                                        </div>
+                                        <div style="{!IF(nextPayDate != null, 'display:block', 'display:none')}">
+                                            <div class="item">
+                                                <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(nextPayDate)}</span>
+                                                <p class="item-name">Next Installment Date</p>
+                                            </div>
+                                        </div>
+                                        <div style="{!IF(installperiod != null, 'display:block', 'display:none')}">
+                                            <div class="item">
+                                                <span class="price"> :&nbsp;&nbsp;&nbsp;{!HTMLENCODE(installperiod)}</span>
+                                                <p class="item-name">Installment Period</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="products">
+                                        <div class="slds-text-heading_medium" style="font-weight: 600;">Credit Card Details
+                                            <h3 class="title"></h3>
+                                        </div>
+                                        <!-- Iframe section start -->
+                                        <center>
+                                            <iframe name="simplify-hosted-form"
+                                                    data-sc-key="{!JSENCODE(hostedpayments_publicKey)}"
+                                                    data-amount="{!JSENCODE(amount)}"
+                                                    data-color="#12B830"
+                                                    data-operation="create.token"
+                                                    style="border: none;height: 700px;width: 700px;overflow: hidden;">
+                                            </iframe>
+                                        </center>
+                                    </div>
+                                    <br/>
+                                    <br/>
+                                </form>
+                            </div>
+                        </section>
+                    </main>    
+                </body>
+                <script>
+                
+                SimplifyCommerce.hostedPayments(
+                    function(response) {
+                        var iframes = document.querySelectorAll('iframe');
+                        for (var i = 0; i < iframes.length; i++) {
+                            iframes[i].parentNode.removeChild(iframes[i]);
+                        }
+                        document.getElementById('spinner').style.display = 'block';
+                        updateSimplifyCreditCard(response.cardToken);
+                    }
+                ).closeOnCompletion();
+                
+                
+                function redirect(){
+                    var result='{!JSENCODE(result)}';
+                    if(result.includes('/apex')){
+                         window.location.href=result;
+                    }else{
+                        var hosturl='{!JSENCODE(refreshPage)}';
+                        var message={type:"UpdateCardDetails",message:result};
+                        try{
+                             opener.postMessage(message,hosturl);
+                             window.close();
+                        }catch(err){
+                            alert(err);
+                        }
+                    }
+                }
+                </script>
+            </html>
+            <apex:includeLightning />
+            <apex:Slds />
+            <apex:actionFunction name="updateSimplifyCreditCard" action="{!updateSimplifyCreditCard}" oncomplete="redirect();"  reRender="checkoutPanel">
+                <apex:param name="responseToken" value="{!responseToken}" assignTo="{!responseToken}"/>
+            </apex:actionFunction>
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>
